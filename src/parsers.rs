@@ -6,8 +6,11 @@ use nom::bytes::complete::{tag, take};
 use nom::number::complete::le_u32;
 use nom::sequence::preceded;
 use nom::multi::many0;
+use nom::combinator::map;
+use nom::sequence::tuple;
+use nom::combinator::rest;
 
-use crate::types::PrayChunk;
+use crate::types::{PrayChunk, CreaturesArchive, Engine};
 
 pub const PRAY_HEADER: &'static [u8] = b"PRAY";
 pub const CREATURESARCHIVE_HEADER: &'static [u8] = b"Creatures Evolution Engine - Archived information file. zLib 1.13 compressed.\x1a\x04";
@@ -25,7 +28,7 @@ fn parse_praychunk(input: &[u8]) -> nom::IResult<&[u8], PrayChunk> {
     let mut data = Vec::with_capacity(uncompressed_size as usize);
     if flags & 0x1 == 1 {
         let mut decoder = ZlibDecoder::new(maybe_compressed);
-        decoder.read_to_end(&mut data).expect("Unable to compress data!"); // TODO: Replace with using the result
+        decoder.read_to_end(&mut data).expect("Unable to decompress data!"); // TODO: Replace with using the result
     } else {
         data.write_all(maybe_compressed).expect("Unable to write data!"); // TODO: Replace with using the Result
     }
@@ -36,6 +39,18 @@ fn parse_praychunk(input: &[u8]) -> nom::IResult<&[u8], PrayChunk> {
             data: data
         })
     )
+}
+
+pub fn parse_creaturesarchive(input: &[u8]) -> nom::IResult<&[u8], CreaturesArchive> {
+    let (input, _) = tag(CREATURESARCHIVE_HEADER)(input)?;
+    let (input, compressed_data) = nom::combinator::rest(input)?;
+    let mut decoder = ZlibDecoder::new(compressed_data);
+    let mut data = Vec::new();
+    decoder.read_to_end(&mut data).expect("Unable to decompress data!");
+    Ok((input, CreaturesArchive {
+        data
+    }))
+
 }
 
 pub fn parse_pray<'a>(input: &'a [u8]) -> nom::IResult<&'a [u8], Vec<PrayChunk>> {

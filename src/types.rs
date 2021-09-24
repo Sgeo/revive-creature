@@ -7,7 +7,8 @@ use flate2::write::ZlibEncoder;
 #[derive(Debug, Clone)]
 pub enum Engine {
     C3,
-    DS
+    DS,
+    Unknown(u32)
 }
 
 #[derive(Debug, Clone)]
@@ -32,5 +33,20 @@ impl PrayChunk {
         output.write_all(&1u32.to_le_bytes())?;
         output.write_all(&encoded)?;
         Ok(output)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CreaturesArchive {
+    pub data: Vec<u8>
+}
+
+impl CreaturesArchive {
+    pub fn serialize(&self) -> Result<Vec<u8>, anyhow::Error> {
+        let mut output: Vec<u8> = Vec::new();
+        output.write_all(crate::parsers::CREATURESARCHIVE_HEADER)?;
+        let mut encoder = ZlibEncoder::new(output, flate2::Compression::default());
+        encoder.write_all(&self.data)?;
+        Ok(encoder.finish()?)
     }
 }
