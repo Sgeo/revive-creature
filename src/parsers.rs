@@ -9,8 +9,8 @@ use nom::multi::many0;
 
 use crate::types::PrayChunk;
 
-const PRAY_HEADER: &'static [u8] = b"PRAY";
-const CREATURESARCHIVE_HEADER: &'static [u8] = b"Creatures Evolution Engine - Archived information file. zLib 1.13 compressed.\x1a\x04";
+pub const PRAY_HEADER: &'static [u8] = b"PRAY";
+pub const CREATURESARCHIVE_HEADER: &'static [u8] = b"Creatures Evolution Engine - Archived information file. zLib 1.13 compressed.\x1a\x04";
 
 use flate2::write::ZlibEncoder;
 use flate2::bufread::ZlibDecoder;
@@ -38,6 +38,6 @@ fn parse_praychunk(input: &[u8]) -> nom::IResult<&[u8], PrayChunk> {
     )
 }
 
-pub fn parse_pray(input: &[u8]) -> nom::IResult<&[u8], Vec<PrayChunk>> {
+pub fn parse_pray<'a>(input: &'a [u8]) -> nom::IResult<&'a [u8], Vec<PrayChunk>> {
     preceded(tag(PRAY_HEADER), many0(parse_praychunk))(input)
 }

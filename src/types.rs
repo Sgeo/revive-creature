@@ -18,7 +18,7 @@ pub struct PrayChunk {
 }
 
 impl PrayChunk {
-    pub fn serialize(&self) -> Result<Vec<u8>, failure::Error> {
+    pub fn serialize(&self) -> Result<Vec<u8>, anyhow::Error> {
         let mut output: Vec<u8> = Vec::new();
         output.write_all(&self.r#type)?;
         output.write_all(&self.name)?;
