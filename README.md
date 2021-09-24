@@ -2,7 +2,7 @@
 Bring Creatures 3 and Docking Station creatures back from the dead!
 
 ## Usage
-`revive-create.exe < dead.creature > revived.creature`
+`revive-creature.exe < dead.creature > revived.creature`
 
 ## Download
 
